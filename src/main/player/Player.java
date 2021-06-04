@@ -50,7 +50,7 @@ public class Player extends Element {
 
     }
 
-    public void moveByBall(int ball_x, int ball_y, float speed_x, float speed_y) {
+    public void moveByBall(int ball_x, int ball_y, float speed_x, float speed_y, boolean ifBotMistake) {
         float slope, predict_x;
         int hit_x = this.x;
 
@@ -64,32 +64,50 @@ public class Player extends Element {
             // ball is in bot's area and dropping
             if (speed_y > 0 && ball_x > (Content.STICK_X - 40)) {
                 predict_x = (580 - ball_y + slope * ball_x) / slope;
-                if (predict_x > Content.FRAME_WIDTH) // ball will touch the right border -> rebound
-                    predict_x = Content.FRAME_WIDTH - (predict_x - Content.FRAME_WIDTH);
+
+                // ball will touch the right border -> rebound
+                if (predict_x > Content.FRAME_WIDTH)
+                    predict_x = Content.FRAME_WIDTH - (predict_x - Content.FRAME_WIDTH) - 20;
+
+                // when ball is fast enough, allow the bot to make mistake
+                // if (ifBotMistake && (Math.abs(speed_x) > 6) && (Math.abs(speed_y) > 11))
+                // predict_x += (70 + Math.random() * 90);
+
                 if (speed_x < 0 && ball_x > ((Content.STICK_X + Content.FRAME_WIDTH) / 2)) // rebound
                     hit_x = this.x - 70;
                 else
                     hit_x = this.x - (int) (Math.random() * 25 + 20);
+
             } else
                 predict_x = 885; // bot's initial x-coordinate
 
             if (hit_x - predict_x > 10) {
                 ifLeft = true;
                 ifRight = false;
+                // let the bot react slowly after catch the ball -> make it stupid
+                if (ifBotMistake && speed_y < 0 && ball_y - this.y < 10)
+                    ifLeft = false;
+
             } else if (hit_x - predict_x < -10) {
                 ifRight = true;
                 ifLeft = false;
+                // let the bot react slowly after catch the ball -> make it stupid
+                if (ifBotMistake && speed_y < 0 && ball_y - this.y < 10)
+                    ifRight = false;
             } else {
                 ifLeft = false;
                 ifRight = false;
                 dx = 0;
             }
 
-            // bot's jump condition: the ball will drop in front of the bot and they r close
-            // enough; if bot meets the jump condition, decide whether to jump by jumpRand
+            /*
+             * bot's jump condition: only when the player's score > 5 , the ball will drop
+             * in front of the bot, and they r close enough; if bot meets the jump
+             * condition, decide whether to jump by jumpRand;
+             */
             double jumpRand = Math.random();
-            if (-60 < (ball_x - this.x) && (ball_x - this.x) <= 0 && speed_y > 0 && Math.abs(this.y - ball_y) < 70
-                    && ifJump == false && jumpRand > 0.5) {
+            if (!ifBotMistake && -60 < (ball_x - this.x) && (ball_x - this.x) <= 0 && speed_y > 0
+                    && Math.abs(this.y - ball_y) < 70 && ifJump == false && jumpRand > 0.3) {
                 ifJump = true;
                 currentSpeed = jumpSpeed;
             }

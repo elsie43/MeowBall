@@ -119,11 +119,18 @@ public class Game extends Base {
     class ScheduleTask extends TimerTask {
         // matain all game running
         public void run() {
+            double mistakeRand = Math.random();
+            boolean ifBotMistake = false;
+            int score1 = record.getCount(1);
+            int score2 = record.getCount(2);
+            int lead = score2 - score1;
             player1.ifStart = true;
             player2.ifStart = true;
-            if (ifBot)
-                player2.moveByBall(ball.getX(), ball.getY(), ball.getBallSpeedX(), ball.getBallSpeedY());
             player1.move();
+            if (score1 < 2 || (lead > 4) || (mistakeRand > 0.4 && (lead > 2) && lead % 2 == 0))
+                ifBotMistake = true;
+            if (ifBot)
+                player2.moveByBall(ball.getX(), ball.getY(), ball.getBallSpeedX(), ball.getBallSpeedY(), ifBotMistake);
             player2.move();
             ball.move();
             collision();

@@ -78,6 +78,13 @@ public class Record extends JPanel {
         count2 += 1;
     }
 
+    public int getCount(int player) {
+        if (player == 1)
+            return count1;
+        else
+            return count2;
+    }
+
     public void showMessage() {
         countLabel1.setText(Integer.toString(count1));
         countLabel2.setText(Integer.toString(count2));
